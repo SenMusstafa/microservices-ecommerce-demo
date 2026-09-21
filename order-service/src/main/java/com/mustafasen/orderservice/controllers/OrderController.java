@@ -4,6 +4,8 @@ import com.mustafasen.orderservice.clients.InventoryClient;
 import com.mustafasen.orderservice.dtos.CreateOrderRequest;
 import com.mustafasen.orderservice.dtos.OrderResponse;
 import com.mustafasen.orderservice.dtos.ReservationResult;
+import com.mustafasen.orderservice.events.OrderCreatedEvent;
+import com.mustafasen.orderservice.events.OrderEventPublisher;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,9 +18,11 @@ import java.util.UUID;
 public class OrderController {
 
     private final InventoryClient inventoryClient;
+    private final OrderEventPublisher orderEventPublisher;
 
-    public OrderController(InventoryClient inventoryClient) {
+    public OrderController(InventoryClient inventoryClient, OrderEventPublisher orderEventPublisher) {
         this.inventoryClient = inventoryClient;
+        this.orderEventPublisher = orderEventPublisher;
     }
 
     @PostMapping
@@ -31,6 +35,9 @@ public class OrderController {
             return new OrderResponse(orderId, request.getProductId(), request.getQuantity(),
                     "REJECTED", reservation.getMessage());
         }
+
+        orderEventPublisher.publishOrderCreated(
+                new OrderCreatedEvent(orderId, request.getProductId(), request.getQuantity(), "CREATED"));
 
         return new OrderResponse(orderId, request.getProductId(), request.getQuantity(),
                 "CREATED", "Order created, remaining stock: " + reservation.getRemainingQuantity());
