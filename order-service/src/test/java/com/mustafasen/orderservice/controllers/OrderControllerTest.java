@@ -6,6 +6,8 @@ import com.mustafasen.orderservice.dtos.OrderResponse;
 import com.mustafasen.orderservice.dtos.ReservationResult;
 import com.mustafasen.orderservice.events.OrderCreatedEvent;
 import com.mustafasen.orderservice.events.OrderEventPublisher;
+import com.mustafasen.orderservice.entities.OrderEntity;
+import com.mustafasen.orderservice.repositories.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,11 +29,14 @@ class OrderControllerTest {
     @Mock
     private OrderEventPublisher orderEventPublisher;
 
+    @Mock
+    private OrderRepository orderRepository;
+
     private OrderController orderController;
 
     @BeforeEach
     void setUp() {
-        orderController = new OrderController(inventoryClient, orderEventPublisher);
+        orderController = new OrderController(inventoryClient, orderEventPublisher, orderRepository);
     }
 
     private static ReservationResult reservation(boolean success, String message, int remaining) {
@@ -56,6 +61,7 @@ class OrderControllerTest {
         assertThat(response.getProductId()).isEqualTo("product-1");
         assertThat(response.getQuantity()).isEqualTo(1);
         assertThat(response.getOrderId()).isNotBlank();
+        verify(orderRepository).save(any(OrderEntity.class));
         verify(orderEventPublisher).publishOrderCreated(any(OrderCreatedEvent.class));
     }
 
@@ -71,6 +77,7 @@ class OrderControllerTest {
 
         assertThat(response.getStatus()).isEqualTo("REJECTED");
         assertThat(response.getMessage()).isEqualTo("Insufficient stock");
+        verify(orderRepository).save(any(OrderEntity.class));
         verifyNoInteractions(orderEventPublisher);
     }
 }
