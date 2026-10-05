@@ -64,7 +64,7 @@ Without `DB_URL` the services fall back to an in-memory H2 database.
 - `required variable DB_URL is missing` → you skipped step 2.
 - `UnknownHostException` for the Neon host, or `Connect timed out` between containers → the Docker
   bridge network is restricted (Codespaces). Use the `docker-compose.host.yml` variant above.
-- Stopping a service (e.g. `inventory-service`) makes the gateway answer `500`; that's expected.
+- Stopping a service (e.g. `inventory-service`) makes the gateway or order-service answer `503`; that's expected.
 
 ## CI/CD
 
