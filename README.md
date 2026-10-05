@@ -65,3 +65,10 @@ Without `DB_URL` the services fall back to an in-memory H2 database.
 - `UnknownHostException` for the Neon host, or `Connect timed out` between containers → the Docker
   bridge network is restricted (Codespaces). Use the `docker-compose.host.yml` variant above.
 - Stopping a service (e.g. `inventory-service`) makes the gateway answer `500`; that's expected.
+
+## CI/CD
+
+`.github/workflows/ci.yml` runs on every push/PR: all Maven tests (including the Testcontainers Kafka
+ones), the frontend build, and a Docker build of all 7 images. On pushes to `main` the images are also
+published to GitHub Container Registry as `ghcr.io/<owner>/<service>:latest` and `:<commit-sha>`
+(uses the built-in `GITHUB_TOKEN`; no secrets to configure).
