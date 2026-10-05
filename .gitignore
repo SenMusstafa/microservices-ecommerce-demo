@@ -6,3 +6,8 @@
 .DS_Store
 *.iml
 .vscode/
+
+# local secrets
+.env
+node_modules/
+frontend/dist/

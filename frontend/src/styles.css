@@ -1,0 +1,23 @@
+:root { font-family: system-ui, sans-serif; color: #1f2933; }
+body { margin: 0; background: #f4f6f8; }
+main { max-width: 760px; margin: 2rem auto; padding: 0 1rem; }
+h1 { margin-bottom: 1rem; }
+nav { display: flex; gap: .5rem; margin-bottom: 1rem; }
+section { background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px #0001; }
+.row { display: flex; gap: .5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+input, select { padding: .5rem; border: 1px solid #cbd2d9; border-radius: 6px; flex: 1; min-width: 100px; }
+button { padding: .5rem .9rem; border: 0; border-radius: 6px; background: #2563eb; color: #fff; cursor: pointer; }
+button.secondary { background: #e4e7eb; color: #1f2933; }
+button.danger { background: #dc2626; }
+nav button { background: #e4e7eb; color: #1f2933; }
+nav button.active { background: #2563eb; color: #fff; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #e4e7eb; }
+.actions { display: flex; gap: .4rem; justify-content: flex-end; }
+.empty { text-align: center; color: #7b8794; }
+.banner { padding: .6rem .9rem; border-radius: 6px; margin-bottom: 1rem; }
+.banner.error { background: #fee2e2; color: #991b1b; }
+.banner.ok { background: #dcfce7; color: #166534; }
+.tag { padding: .1rem .5rem; border-radius: 99px; font-size: .8rem; }
+.tag.CREATED { background: #dcfce7; color: #166534; }
+.tag.REJECTED { background: #fee2e2; color: #991b1b; }
