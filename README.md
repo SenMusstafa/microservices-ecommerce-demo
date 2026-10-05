@@ -26,6 +26,12 @@ Requirements: Docker with Compose v2 (about 3 GB free RAM).
    ```bash
    docker compose up --build
    ```
+   **In GitHub Codespaces** (or anywhere container-to-container networking is restricted) use the
+   host-networking variant instead:
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.host.yml up --build
+   ```
+   In Codespaces, open the forwarded port 3000 from the **Ports** tab.
    The first build takes a few minutes. Tables are created automatically and three demo
    products are seeded on first start.
 4. **Open** <http://localhost:3000> (app) and <http://localhost:8761> (Eureka dashboard).
@@ -56,6 +62,6 @@ Without `DB_URL` the services fall back to an in-memory H2 database.
 ## Troubleshooting
 
 - `required variable DB_URL is missing` → you skipped step 2.
-- Services crash-looping with `UnknownHostException` for the Neon host, or `Connect timed out`
-  between containers → your Docker network blocks container DNS/TCP (seen in some sandboxes and
-  corporate VPN setups). Try a plain Docker host.
+- `UnknownHostException` for the Neon host, or `Connect timed out` between containers → the Docker
+  bridge network is restricted (Codespaces). Use the `docker-compose.host.yml` variant above.
+- Stopping a service (e.g. `inventory-service`) makes the gateway answer `500`; that's expected.

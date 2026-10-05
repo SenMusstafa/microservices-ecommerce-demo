@@ -1,11 +1,11 @@
 server {
-    listen 80;
+    listen ${NGINX_PORT};
     root /usr/share/nginx/html;
     index index.html;
 
-    # API calls go to the gateway container (no CORS needed: same origin).
+    # API calls go to the gateway (no CORS needed: same origin).
     location /api/ {
-        proxy_pass http://gateway-service:8080;
+        proxy_pass ${GATEWAY_URL};
         proxy_set_header Host $host;
         proxy_connect_timeout 5s;
         proxy_read_timeout 30s;

@@ -1,0 +1,60 @@
+# Host-networking variant for environments where container-to-container
+# networking is restricted (GitHub Codespaces, some sandboxes/VPNs).
+# Every container shares the host network and talks via localhost:
+#   docker compose -f docker-compose.yml -f docker-compose.host.yml up --build
+# Ports used on the host: 3000 (app), 8080, 8761, 8888, 9092.
+
+x-host: &host
+  network_mode: host
+  ports: !reset []
+
+x-host-spring-env: &host-spring-env
+  SPRING_CONFIG_IMPORT: optional:configserver:http://localhost:8888
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://localhost:8761/eureka
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: localhost:9092
+
+services:
+  kafka:
+    <<: *host
+    environment:
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_LISTENERS: PLAINTEXT://localhost:9092,CONTROLLER://localhost:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+
+  discovery-service:
+    <<: *host
+
+  config-service:
+    <<: *host
+
+  inventory-service:
+    <<: *host
+    environment:
+      <<: *host-spring-env
+
+  order-service:
+    <<: *host
+    environment:
+      <<: *host-spring-env
+
+  notification-service:
+    <<: *host
+    environment:
+      <<: *host-spring-env
+
+  gateway-service:
+    <<: *host
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://localhost:8761/eureka
+
+  frontend:
+    <<: *host
+    environment:
+      NGINX_PORT: "3000"
+      GATEWAY_URL: http://localhost:8080
