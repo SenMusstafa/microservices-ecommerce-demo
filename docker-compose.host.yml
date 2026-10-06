@@ -2,7 +2,7 @@
 # networking is restricted (GitHub Codespaces, some sandboxes/VPNs).
 # Every container shares the host network and talks via localhost:
 #   docker compose -f docker-compose.yml -f docker-compose.host.yml up --build
-# Ports used on the host: 3000 (app), 8080, 8761, 8888, 9092.
+# Ports used on the host: 3000 (app), 8080, 8761, 8888, 9092, 9411 (Zipkin).
 
 x-host: &host
   network_mode: host
@@ -12,6 +12,7 @@ x-host-spring-env: &host-spring-env
   SPRING_CONFIG_IMPORT: optional:configserver:http://localhost:8888
   EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://localhost:8761/eureka
   SPRING_KAFKA_BOOTSTRAP_SERVERS: localhost:9092
+  ZIPKIN_URL: http://localhost:9411/api/v2/spans
 
 services:
   kafka:
@@ -26,6 +27,9 @@ services:
       interval: 10s
       timeout: 10s
       retries: 12
+
+  zipkin:
+    <<: *host
 
   discovery-service:
     <<: *host
@@ -52,6 +56,7 @@ services:
     <<: *host
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://localhost:8761/eureka
+      ZIPKIN_URL: http://localhost:9411/api/v2/spans
 
   frontend:
     <<: *host

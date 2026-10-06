@@ -34,7 +34,8 @@ Requirements: Docker with Compose v2 (about 3 GB free RAM).
    In Codespaces, open the forwarded port 3000 from the **Ports** tab.
    The first build takes a few minutes. Tables are created automatically and three demo
    products are seeded on first start.
-4. **Open** <http://localhost:3000> (app) and <http://localhost:8761> (Eureka dashboard).
+4. **Open** <http://localhost:3000> (app), <http://localhost:8761> (Eureka dashboard) and
+   <http://localhost:9411> (Zipkin traces).
 
 Stop with `docker compose down`. Data stays in Neon, so it survives restarts.
 
@@ -50,6 +51,14 @@ Stop with `docker compose down`. Data stays in Neon, so it survives restarts.
 - Neon's free tier suspends an idle database; the first request after a pause can take a few seconds.
 
 Useful: `docker compose ps`, `docker compose logs -f <service>`, `docker compose up -d --build <service>`.
+
+## Tracing (Zipkin)
+
+Open <http://localhost:9411>, click **Run query**, pick a trace. One order shows the whole path:
+`gateway → order-service → inventory-service`, then `order-service → Kafka → notification-service`.
+Every log line carries `[service,traceId,spanId]`, so you can grep a request across services:
+`docker compose logs | grep <traceId>`. Failed requests show up red, which makes the
+"stop a service and see what breaks" experiments easy to read.
 
 ## Development without Docker
 
