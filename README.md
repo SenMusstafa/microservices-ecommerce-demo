@@ -141,3 +141,7 @@ Without `DB_URL` the services fall back to an in-memory H2 database.
 ones), the frontend build, and a Docker build of all 8 images. On pushes to `main` the images are also
 published to GitHub Container Registry as `ghcr.io/<owner>/<service>:latest` and `:<commit-sha>`
 (uses the built-in `GITHUB_TOKEN`; no secrets to configure).
+
+## License
+
+[MIT](LICENSE)
