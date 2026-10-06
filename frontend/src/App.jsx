@@ -202,7 +202,8 @@ function Orders({ products, orders, run, refreshOrders, refreshProducts }) {
   const submit = async (e) => {
     e.preventDefault();
     const result = await run(() => api.createOrder(productId, Number(quantity)));
-    if (result) setLast(result);
+    // Grab the order's own trace id before the list refreshes below overwrite "last request".
+    if (result) setLast({ ...result, traceId: api.lastTraceId });
     refreshOrders();
     refreshProducts();
   };
@@ -230,6 +231,15 @@ function Orders({ products, orders, run, refreshOrders, refreshProducts }) {
       {last && (
         <div className={`banner ${last.status === "CREATED" ? "ok" : "error"}`}>
           {last.status}: {last.message}
+          {last.traceId && (
+            <>
+              {" "}
+              —{" "}
+              <a href={api.zipkinTraceUrl(last.traceId)} target="_blank" rel="noreferrer">
+                view this order's trace
+              </a>
+            </>
+          )}
         </div>
       )}
 
