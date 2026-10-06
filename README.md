@@ -2,6 +2,17 @@
 
 [![CI](https://github.com/SenMusstafa/microservices-ecommerce-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/SenMusstafa/microservices-ecommerce-demo/actions/workflows/ci.yml)
 
+<p align="center">
+  <img src="docs/ui-products.png" alt="Products page: CRUD, stock and the legacy SOAP warehouse column" width="48%">
+  <img src="docs/ui-orders.png" alt="Orders page: placing orders and the CREATED / REJECTED history" width="48%">
+</p>
+<p align="center">
+  <img src="docs/zipkin-trace.png" alt="Zipkin trace of a request travelling gateway-service to order-service" width="97%">
+</p>
+<p align="center"><sub>The React UI (products with the legacy warehouse check, orders) and a Zipkin trace
+opened from the UI's “Last request trace” link.</sub></p>
+
+
 Spring Boot microservices (Eureka, Config Server, API Gateway, Inventory, Order, Notification over Kafka)
 with a React frontend. Everything runs in Docker locally; **only the PostgreSQL database is hosted
 externally** (free Neon tier), so you don't need a local DB.
