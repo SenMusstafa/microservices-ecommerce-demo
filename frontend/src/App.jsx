@@ -9,6 +9,9 @@ export default function App() {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState(null);
   const [notice, setNotice] = useState(null);
+  const [traceId, setTraceId] = useState(null);
+
+  useEffect(() => api.onTraceId(setTraceId), []);
 
   const run = useCallback(async (fn, okMessage) => {
     setError(null);
@@ -49,6 +52,14 @@ export default function App() {
       </nav>
 
       {error && <div className="banner error">⚠ {error}</div>}
+      {traceId && (
+        <div className="trace">
+          Last request trace:{" "}
+          <a href={api.zipkinTraceUrl(traceId)} target="_blank" rel="noreferrer">
+            {traceId}
+          </a>
+        </div>
+      )}
       {notice && <div className="banner ok">{notice}</div>}
 
       {tab === "products" ? (
@@ -69,6 +80,12 @@ export default function App() {
 function Products({ products, run, refresh }) {
   const [form, setForm] = useState(emptyForm);
   const [editing, setEditing] = useState(false);
+  const [warehouse, setWarehouse] = useState({});
+
+  const checkWarehouse = async (id) => {
+    const result = await run(() => api.getWarehouseStock(id));
+    if (result) setWarehouse((w) => ({ ...w, [id]: result }));
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -130,6 +147,7 @@ function Products({ products, run, refresh }) {
             <th>ID</th>
             <th>Name</th>
             <th>Stock</th>
+            <th title="Fetched from the legacy SOAP system through the adapter">Legacy warehouse</th>
             <th />
           </tr>
         </thead>
@@ -139,6 +157,15 @@ function Products({ products, run, refresh }) {
               <td>{p.id}</td>
               <td>{p.name}</td>
               <td>{p.quantity}</td>
+              <td>
+                {warehouse[p.id] ? (
+                  `${warehouse[p.id].quantity} @ ${warehouse[p.id].location}`
+                ) : (
+                  <button className="secondary" onClick={() => checkWarehouse(p.id)}>
+                    Check
+                  </button>
+                )}
+              </td>
               <td className="actions">
                 <button
                   className="secondary"
@@ -157,7 +184,7 @@ function Products({ products, run, refresh }) {
           ))}
           {products.length === 0 && (
             <tr>
-              <td colSpan="4" className="empty">No products</td>
+              <td colSpan="5" className="empty">No products</td>
             </tr>
           )}
         </tbody>

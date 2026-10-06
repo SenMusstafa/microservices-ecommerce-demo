@@ -21,3 +21,5 @@ th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #e4e7eb; }
 .tag { padding: .1rem .5rem; border-radius: 99px; font-size: .8rem; }
 .tag.CREATED { background: #dcfce7; color: #166534; }
 .tag.REJECTED { background: #fee2e2; color: #991b1b; }
+.trace { font-size: .85rem; color: #52606d; margin-bottom: 1rem; }
+.trace a { font-family: monospace; }

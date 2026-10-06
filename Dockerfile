@@ -9,12 +9,14 @@ COPY gateway-service/pom.xml gateway-service/
 COPY inventory-service/pom.xml inventory-service/
 COPY order-service/pom.xml order-service/
 COPY notification-service/pom.xml notification-service/
+COPY legacy-soap-service/pom.xml legacy-soap-service/
 COPY ${MODULE}/src ${MODULE}/src
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -q -B -pl ${MODULE} -am -DskipTests package \
     && cp ${MODULE}/target/${MODULE}-*.jar /build/app.jar
 
 FROM eclipse-temurin:17-jre
+LABEL org.opencontainers.image.source="https://github.com/SenMusstafa/microservices-ecommerce-demo"
 WORKDIR /app
 COPY --from=build /build/app.jar app.jar
 ENV JAVA_TOOL_OPTIONS="-Xmx256m"

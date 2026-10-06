@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:wh="http://legacy.example.com/warehouse"
+             targetNamespace="http://legacy.example.com/warehouse"
+             name="WarehouseService">
+  <types>
+    <xsd:schema targetNamespace="http://legacy.example.com/warehouse" elementFormDefault="qualified">
+      <xsd:element name="GetStockLevelRequest">
+        <xsd:complexType><xsd:sequence><xsd:element name="sku" type="xsd:string"/></xsd:sequence></xsd:complexType>
+      </xsd:element>
+      <xsd:element name="GetStockLevelResponse">
+        <xsd:complexType><xsd:sequence>
+          <xsd:element name="sku" type="xsd:string"/>
+          <xsd:element name="quantity" type="xsd:int"/>
+          <xsd:element name="location" type="xsd:string"/>
+        </xsd:sequence></xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </types>
+  <message name="GetStockLevelIn"><part name="parameters" element="wh:GetStockLevelRequest"/></message>
+  <message name="GetStockLevelOut"><part name="parameters" element="wh:GetStockLevelResponse"/></message>
+  <portType name="WarehousePort">
+    <operation name="GetStockLevel"><input message="wh:GetStockLevelIn"/><output message="wh:GetStockLevelOut"/></operation>
+  </portType>
+  <binding name="WarehouseBinding" type="wh:WarehousePort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="GetStockLevel">
+      <soap:operation soapAction="GetStockLevel"/>
+      <input><soap:body use="literal"/></input><output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+  <service name="WarehouseService">
+    <port name="WarehousePort" binding="wh:WarehouseBinding"><soap:address location="http://localhost:8090/ws"/></port>
+  </service>
+</definitions>

@@ -2,7 +2,7 @@
 # networking is restricted (GitHub Codespaces, some sandboxes/VPNs).
 # Every container shares the host network and talks via localhost:
 #   docker compose -f docker-compose.yml -f docker-compose.host.yml up --build
-# Ports used on the host: 3000 (app), 8080, 8761, 8888, 9092, 9411 (Zipkin).
+# Ports used on the host: 3000 (app), 8080, 8090 (SOAP), 8761, 8888, 9092, 9411 (Zipkin).
 
 x-host: &host
   network_mode: host
@@ -31,6 +31,9 @@ services:
   zipkin:
     <<: *host
 
+  legacy-soap-service:
+    <<: *host
+
   discovery-service:
     <<: *host
 
@@ -41,6 +44,7 @@ services:
     <<: *host
     environment:
       <<: *host-spring-env
+      LEGACY_WAREHOUSE_URL: http://localhost:8090/ws
 
   order-service:
     <<: *host

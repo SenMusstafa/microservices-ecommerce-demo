@@ -4,9 +4,28 @@ Spring Boot microservices (Eureka, Config Server, API Gateway, Inventory, Order,
 with a React frontend. Everything runs in Docker locally; **only the PostgreSQL database is hosted
 externally** (free Neon tier), so you don't need a local DB.
 
-```
-Browser → frontend (nginx :3000) → gateway (:8080) → order-service / inventory-service → Neon Postgres
-                                                        └→ Kafka → notification-service
+```mermaid
+flowchart LR
+    B[Browser] --> F["frontend<br/>React + nginx :3000"]
+    F -->|/api| G["gateway-service :8080"]
+    G -->|lb://| O[order-service]
+    G -->|lb://| I[inventory-service]
+    O -->|Feign: reserve stock| I
+    O -->|publish OrderCreatedEvent| K[(Kafka)]
+    K --> N[notification-service]
+    O --> DB[(Neon Postgres)]
+    I --> DB
+    I -->|"REST → SOAP adapter"| L["legacy-soap-service :8090<br/>(legacy warehouse)"]
+    D[discovery-service<br/>Eureka :8761] -.registry.- G
+    D -.- O
+    D -.- I
+    C[config-service :8888] -.config.- O
+    C -.- I
+    C -.- N
+    G -.spans.-> Z[Zipkin :9411]
+    O -.-> Z
+    I -.-> Z
+    N -.-> Z
 ```
 
 ## Run it
@@ -39,6 +58,18 @@ Requirements: Docker with Compose v2 (about 3 GB free RAM).
 
 Stop with `docker compose down`. Data stays in Neon, so it survives restarts.
 
+### Using the pre-built images (no local build)
+
+CI publishes every image to GitHub Container Registry. Once the packages are public you can skip the
+Maven/npm builds entirely:
+
+```bash
+docker compose pull
+docker compose up --no-build          # add -f docker-compose.host.yml in Codespaces
+```
+(Packages are private by default: GitHub → profile → Packages → each package → *Package settings* →
+*Change visibility* → Public. Otherwise `docker login ghcr.io` first.)
+
 ## Things to try (and break)
 
 - Add / edit / delete products in the UI; check them in the Neon console's Tables view.
@@ -48,16 +79,31 @@ Stop with `docker compose down`. Data stays in Neon, so it survives restarts.
 - `docker compose stop inventory-service`, then use the UI: the gateway returns an error the UI shows.
   `docker compose start inventory-service` and it recovers once it re-registers in Eureka.
 - `docker compose stop kafka`, place an order and read the order-service logs.
+- `docker compose stop legacy-soap-service`, click **Check** → `503`; the Zipkin trace shows the failed call.
 - Neon's free tier suspends an idle database; the first request after a pause can take a few seconds.
 
 Useful: `docker compose ps`, `docker compose logs -f <service>`, `docker compose up -d --build <service>`.
+
+## Legacy SOAP system and the adapter
+
+`legacy-soap-service` simulates an old warehouse system that only speaks SOAP/XML
+(`POST http://localhost:8090/ws`, WSDL at `http://localhost:8090/ws?wsdl`, operation `GetStockLevel`).
+`inventory-service` hides it behind an **adapter** (`SoapWarehouseAdapter` implements `WarehouseGateway`):
+REST clients just call `GET /api/v1/inventory/products/{id}/warehouse` and get JSON back; the SOAP
+envelope building/parsing and fault handling stay inside the adapter. In the UI use the **Check**
+button in the *Legacy warehouse* column. Unknown SKU → SOAP Fault → `404`; legacy system down → `503`.
+
+```bash
+curl -s -X POST localhost:8090/ws -H 'Content-Type: text/xml' -d '<e:Envelope xmlns:e="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wh="http://legacy.example.com/warehouse"><e:Body><wh:GetStockLevelRequest><wh:sku>product-1</wh:sku></wh:GetStockLevelRequest></e:Body></e:Envelope>'
+```
 
 ## Tracing (Zipkin)
 
 Open <http://localhost:9411>, click **Run query**, pick a trace. One order shows the whole path:
 `gateway → order-service → inventory-service`, then `order-service → Kafka → notification-service`.
 Every log line carries `[service,traceId,spanId]`, so you can grep a request across services:
-`docker compose logs | grep <traceId>`. Failed requests show up red, which makes the
+`docker compose logs | grep <traceId>`. The UI shows the trace id of the last request as a link
+straight to its Zipkin trace (services return it in an `X-Trace-Id` header). Failed requests show up red, which makes the
 "stop a service and see what breaks" experiments easy to read.
 
 ## Development without Docker
@@ -78,6 +124,6 @@ Without `DB_URL` the services fall back to an in-memory H2 database.
 ## CI/CD
 
 `.github/workflows/ci.yml` runs on every push/PR: all Maven tests (including the Testcontainers Kafka
-ones), the frontend build, and a Docker build of all 7 images. On pushes to `main` the images are also
+ones), the frontend build, and a Docker build of all 8 images. On pushes to `main` the images are also
 published to GitHub Container Registry as `ghcr.io/<owner>/<service>:latest` and `:<commit-sha>`
 (uses the built-in `GITHUB_TOKEN`; no secrets to configure).

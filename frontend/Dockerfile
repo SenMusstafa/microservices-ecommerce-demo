@@ -6,6 +6,7 @@ COPY . .
 RUN npm run build
 
 FROM nginx:1.27-alpine
+LABEL org.opencontainers.image.source="https://github.com/SenMusstafa/microservices-ecommerce-demo"
 # nginx's entrypoint renders this template with the env vars below.
 ENV NGINX_PORT=80 GATEWAY_URL=http://gateway-service:8080
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template

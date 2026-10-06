@@ -26,6 +26,7 @@
         <module>inventory-service</module>
         <module>order-service</module>
         <module>notification-service</module>
+        <module>legacy-soap-service</module>
     </modules>
 
 </project>

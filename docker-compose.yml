@@ -44,6 +44,7 @@ services:
 
   discovery-service:
     build: { context: ., args: { MODULE: discovery-service } }
+    image: ghcr.io/sensmusstafa/discovery-service:latest
     container_name: discovery-service
     restart: on-failure
     ports:
@@ -55,6 +56,7 @@ services:
 
   config-service:
     build: { context: ., args: { MODULE: config-service } }
+    image: ghcr.io/sensmusstafa/config-service:latest
     container_name: config-service
     restart: on-failure
     healthcheck:
@@ -62,22 +64,34 @@ services:
       interval: 5s
       retries: 20
 
+  legacy-soap-service:
+    build: { context: ., args: { MODULE: legacy-soap-service } }
+    image: ghcr.io/sensmusstafa/legacy-soap-service:latest
+    container_name: legacy-soap-service
+    restart: on-failure
+    ports:
+      - "8090:8090"     # SOAP endpoint (try http://localhost:8090/ws?wsdl)
+
   inventory-service:
     <<: *spring-common
     build: { context: ., args: { MODULE: inventory-service } }
+    image: ghcr.io/sensmusstafa/inventory-service:latest
     container_name: inventory-service
     environment:
       <<: *spring-env
       DB_URL: ${DB_URL:?copy .env.example to .env and fill it in}
       DB_USER: ${DB_USER:?}
       DB_PASSWORD: ${DB_PASSWORD:?}
+      LEGACY_WAREHOUSE_URL: http://legacy-soap-service:8090/ws
     depends_on:
       config-service: { condition: service_healthy }
       discovery-service: { condition: service_healthy }
+      legacy-soap-service: { condition: service_started }
 
   order-service:
     <<: *spring-common
     build: { context: ., args: { MODULE: order-service } }
+    image: ghcr.io/sensmusstafa/order-service:latest
     container_name: order-service
     environment:
       <<: *spring-env
@@ -92,6 +106,7 @@ services:
   notification-service:
     <<: *spring-common
     build: { context: ., args: { MODULE: notification-service } }
+    image: ghcr.io/sensmusstafa/notification-service:latest
     container_name: notification-service
     depends_on:
       config-service: { condition: service_healthy }
@@ -100,6 +115,7 @@ services:
 
   gateway-service:
     build: { context: ., args: { MODULE: gateway-service } }
+    image: ghcr.io/sensmusstafa/gateway-service:latest
     container_name: gateway-service
     restart: on-failure
     environment:
@@ -112,6 +128,7 @@ services:
 
   frontend:
     build: ./frontend
+    image: ghcr.io/sensmusstafa/frontend:latest
     container_name: frontend
     ports:
       - "3000:80"

@@ -51,6 +51,7 @@ jobs:
           - inventory-service
           - order-service
           - notification-service
+          - legacy-soap-service
           - frontend
     steps:
       - uses: actions/checkout@v7
