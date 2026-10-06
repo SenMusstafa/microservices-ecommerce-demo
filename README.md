@@ -7,10 +7,11 @@
   <img src="docs/ui-orders.png" alt="Orders page: placing orders and the CREATED / REJECTED history" width="48%">
 </p>
 <p align="center">
-  <img src="docs/zipkin-trace.png" alt="Zipkin trace of a request travelling gateway-service to order-service" width="97%">
+  <img src="docs/zipkin-trace.png" alt="Zipkin trace of one order: gateway, order-service, inventory-service, then Kafka to notification-service" width="97%">
 </p>
-<p align="center"><sub>The React UI (products with the legacy warehouse check, orders) and a Zipkin trace
-opened from the UI's “Last request trace” link.</sub></p>
+<p align="center"><sub>The React UI (products with the legacy warehouse check, orders) and the Zipkin trace of a
+single order, opened from the UI's “view this order's trace” link: gateway → order-service →
+inventory-service, then order-service → Kafka → notification-service (5 services, 7 spans).</sub></p>
 
 
 Spring Boot microservices (Eureka, Config Server, API Gateway, Inventory, Order, Notification over Kafka)
