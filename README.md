@@ -1,5 +1,7 @@
 # microservices-ecommerce-demo
 
+[![CI](https://github.com/SenMusstafa/microservices-ecommerce-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/SenMusstafa/microservices-ecommerce-demo/actions/workflows/ci.yml)
+
 Spring Boot microservices (Eureka, Config Server, API Gateway, Inventory, Order, Notification over Kafka)
 with a React frontend. Everything runs in Docker locally; **only the PostgreSQL database is hosted
 externally** (free Neon tier), so you don't need a local DB.
